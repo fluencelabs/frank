@@ -18,10 +18,6 @@ package fluence.vm
 
 object Utils {
 
-  def getModuleDirPrefix(): String =
-    // getProperty could return different path depends on the run method (Idea or sbt)
-    if (System.getProperty("user.dir").endsWith("/vm"))
-      System.getProperty("user.dir")
-    else
-      System.getProperty("user.dir") + "/vm/"
+  // TODO: getProperty could return different path depends on the run method (Idea or sbt)
+  def getModuleDirPrefix(): String = System.getProperty("user.dir")
 }

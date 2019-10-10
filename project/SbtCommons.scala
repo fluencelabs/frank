@@ -33,14 +33,14 @@ object SbtCommons {
       "-Xms4G",
       "-Xmx4G",
       "-Xss6M",
-      s"-Djava.library.path=${file("").getAbsolutePath}/vm/src/main/rust/target/release"
+      //s"-Djava.library.path=${file("").getAbsolutePath}/src/main/rust/target/release"
     ),
     javaOptions in IntegrationTest ++= Seq(
       "-XX:MaxMetaspaceSize=4G",
       "-Xms4G",
       "-Xmx4G",
       "-Xss6M",
-      s"-Djava.library.path=${file("").getAbsolutePath}/vm/src/main/rust/target/release"
+      //s"-Djava.library.path=${file("").getAbsolutePath}/src/main/rust/target/release"
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
@@ -69,7 +69,7 @@ object SbtCommons {
 
   def compileFrank() = {
     val projectRoot = file("").getAbsolutePath
-    val frankFolder = s"$projectRoot/vm/src/main/rust"
+    val frankFolder = s"$projectRoot/src/main/rust"
     val localCompileCmd = s"cargo +$rustToolchain build --manifest-path $frankFolder/Cargo.toml --release --lib"
     val crossCompileCmd = s"cd $frankFolder ; cross build --target x86_64-unknown-linux-gnu --release --lib"
 
@@ -102,11 +102,7 @@ object SbtCommons {
       compile := (compile in Compile)
         .dependsOn(Def.task {
           // by defaults, user.dir in sbt points to a submodule directory while in Idea to the project root
-          val resourcesPath =
-            if (System.getProperty("user.dir").endsWith("/vm"))
-              System.getProperty("user.dir") + "/src/it/resources/"
-            else
-              System.getProperty("user.dir") + "/vm/src/it/resources/"
+          val resourcesPath = System.getProperty("user.dir") + "/src/it/resources/"
 
           val log = streams.value.log
           val llamadbUrl = "https://github.com/fluencelabs/llamadb-wasm/releases/download/0.1.2/llama_db.wasm"
