@@ -32,15 +32,13 @@ object SbtCommons {
       "-XX:MaxMetaspaceSize=4G",
       "-Xms4G",
       "-Xmx4G",
-      "-Xss6M",
-      //s"-Djava.library.path=${file("").getAbsolutePath}/src/main/rust/target/release"
+      "-Xss6M"
     ),
     javaOptions in IntegrationTest ++= Seq(
       "-XX:MaxMetaspaceSize=4G",
       "-Xms4G",
       "-Xmx4G",
-      "-Xss6M",
-      //s"-Djava.library.path=${file("").getAbsolutePath}/src/main/rust/target/release"
+      "-Xss6M"
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
   )
@@ -57,23 +55,12 @@ object SbtCommons {
 
   val rustToolchain = "nightly-2019-09-23"
 
-  def installPrerequisites() = {
-    val installRust = s"curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $rustToolchain"
-    val installToolchain = s"~/.cargo/bin/rustup toolchain install $rustToolchain"
-    val installCross = "cargo install cross"
-
-    //assert((installRust !) == 0, "Rust installation failed")
-    //assert((installToolchain !) == 0 , s"toolchain $rustToolchain installation failed")
-    (installCross !)
-  }
-
   def compileFrank() = {
     val projectRoot = file("").getAbsolutePath
     val frankFolder = s"$projectRoot/src/main/rust"
     val localCompileCmd = s"cargo +$rustToolchain build --manifest-path $frankFolder/Cargo.toml --release --lib"
     val crossCompileCmd = s"cd $frankFolder ; cross build --target x86_64-unknown-linux-gnu --release --lib"
 
-    println(crossCompileCmd)
     assert((localCompileCmd !) == 0, "Frank VM native compilation failed")
     assert((crossCompileCmd !) == 0, "Cross compilation to linux failed")
   }
@@ -85,9 +72,6 @@ object SbtCommons {
       compile := (compile in Compile)
         .dependsOn(Def.task {
           val log = streams.value.log
-
-          log.info("Installing prerequisites for native part compilation")
-          installPrerequisites()
 
           log.info("Compiling Frank VM")
           compileFrank()
