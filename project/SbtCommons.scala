@@ -2,9 +2,11 @@ import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.headerLicense
 import de.heikoseeberger.sbtheader.License
 import org.scalafmt.sbt.ScalafmtPlugin.autoImport.scalafmtOnCompile
 import sbt.Keys.{javaOptions, _}
-import sbt.{Def, addCompilerPlugin, _}
+import java.io.File
+import sbt.{Def, IO, addCompilerPlugin, _}
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import sbtassembly.{MergeStrategy, PathList}
+import bintray.BintrayKeys._
 
 import scala.sys.process._
 
@@ -24,7 +26,11 @@ object SbtCommons {
     startYear                            := Some(2019),
     licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
     headerLicense := Some(License.ALv2("2019", organizationName.value)),
-    resolvers += Resolver.bintrayRepo("fluencelabs", "releases"),
+    publishMavenStyle   := true,
+    scalafmtOnCompile   := true,
+    bintrayOrganization := Some("fluencelabs"),
+    bintrayRepository   := "releases",
+    resolvers ++= Seq(Resolver.bintrayRepo("fluencelabs", "releases"), Resolver.sonatypeRepo("releases")),
     scalafmtOnCompile := true,
     // see good explanation https://gist.github.com/djspiewak/7a81a395c461fd3a09a6941d4cd040f2
     scalacOptions ++= Seq("-Ypartial-unification", "-deprecation"),
@@ -59,6 +65,7 @@ object SbtCommons {
     val projectRoot = file("").getAbsolutePath
     val frankFolder = s"$projectRoot/src/main/rust"
     val localCompileCmd = s"cargo +$rustToolchain build --manifest-path $frankFolder/Cargo.toml --release --lib"
+    // TODO: cross build with manifest path doesn't work - so it needs to explicitly change a directory
     val crossCompileCmd = s"cd $frankFolder ; cross build --target x86_64-unknown-linux-gnu --release --lib"
 
     assert((localCompileCmd !) == 0, "Frank VM native compilation failed")
@@ -77,6 +84,36 @@ object SbtCommons {
           compileFrank()
         })
         .value
+    )
+
+  def nativeResourceSettings(): Seq[Def.Setting[_]] =
+    Seq(
+      resourceGenerators in Compile += Def.task {
+        val managedResource = s"${(resourceManaged in Compile).value}/native"
+
+        val darwinLib = new File(managedResource + "/x86_64-darwin/libfrank.dylib")
+        val linuxLib = new File(managedResource + "/linux_x86_64/libfrank.so")
+
+        IO.copyFile(
+          new File(s"${file("").getAbsolutePath}/src/main/rust/target/x86_64-unknown-linux-gnu/release/libfrank.so"),
+          linuxLib
+        )
+
+        System.getProperty("os.name").toLowerCase match {
+          case os if os.contains("linux") => linuxLib :: Nil
+          case os if os.contains("mac") => {
+            IO.copyFile(
+              new File(s"${file("").getAbsolutePath}/src/main/rust/target/release/libfrank.dylib"),
+              darwinLib
+            )
+            linuxLib :: darwinLib :: Nil
+          }
+          case os ⇒ {
+            new RuntimeException(s"$os is unsupported, only *nix and MacOS OS are supported now")
+            Nil
+          }
+        }
+      }.taskValue
     )
 
   def downloadLlamadb(): Seq[Def.Setting[_]] =

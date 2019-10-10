@@ -24,7 +24,7 @@ rustup: &rustup
   - run: |
       curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-09-23
       ~/.cargo/bin/rustup toolchain install nightly-2019-09-23 # in case some other toolchain was already installed
-      ~/.cargo/bin/rustup target add wasm32-unknown-unknown --toolchain nightly-2019-09-23
+      ~/.cargo/bin/cargo install cross
 
 version: 2
 jobs:
