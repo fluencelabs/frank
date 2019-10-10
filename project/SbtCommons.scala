@@ -2,7 +2,7 @@ import de.heikoseeberger.sbtheader.HeaderPlugin.autoImport.headerLicense
 import de.heikoseeberger.sbtheader.License
 import org.scalafmt.sbt.ScalafmtPlugin.autoImport.scalafmtOnCompile
 import sbt.Keys.{javaOptions, _}
-import sbt.{Def, addCompilerPlugin, taskKey, _}
+import sbt.{Def, addCompilerPlugin, _}
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import sbtassembly.{MergeStrategy, PathList}
 
@@ -11,11 +11,6 @@ import scala.sys.process._
 object SbtCommons {
 
   val scalaV = scalaVersion := "2.12.9"
-
-  val kindProjector = Seq(
-    resolvers += Resolver.sonatypeRepo("releases"),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.0")
-  )
 
   val commons = Seq(
     scalaV,
@@ -48,7 +43,7 @@ object SbtCommons {
       s"-Djava.library.path=${file("").getAbsolutePath}/vm/src/main/rust/target/release"
     ),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0")
-  ) ++ kindProjector
+  )
 
   val mergeStrategy = Def.setting[String => MergeStrategy]({
     // a module definition fails compilation for java 8, just skip it
@@ -141,62 +136,14 @@ object SbtCommons {
   val catsEffectVersion = "2.0.0"
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
 
-  val shapeless = "com.chuusai" %% "shapeless" % "2.3.3"
-
-  val fs2Version = "1.0.4"
-  val fs2 = "co.fs2"   %% "fs2-core"             % fs2Version
-  val fs2rx = "co.fs2" %% "fs2-reactive-streams" % fs2Version
-  val fs2io = "co.fs2" %% "fs2-io"               % fs2Version
-
   // functional wrapper around 'lightbend/config'
   val ficus = "com.iheart" %% "ficus" % "1.4.5"
 
-  val cryptoVersion = "0.0.9"
-  val cryptoHashsign = "one.fluence" %% "crypto-hashsign" % cryptoVersion
-  val cryptoJwt = "one.fluence"      %% "crypto-jwt"      % cryptoVersion
-  val cryptoCipher = "one.fluence"   %% "crypto-cipher"   % cryptoVersion
-
-  val codecVersion = "0.0.5"
-  val codecCore = "one.fluence" %% "codec-core" % codecVersion
-
-  val sttpVersion = "1.6.3"
-  val sttp = "com.softwaremill.sttp"            %% "core"                           % sttpVersion
-  val sttpCirce = "com.softwaremill.sttp"       %% "circe"                          % sttpVersion
-  val sttpFs2Backend = "com.softwaremill.sttp"  %% "async-http-client-backend-fs2"  % sttpVersion
-  val sttpCatsBackend = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
-
-  val http4sVersion = "0.20.10"
-  val http4sDsl = "org.http4s"    %% "http4s-dsl"          % http4sVersion
-  val http4sServer = "org.http4s" %% "http4s-blaze-server" % http4sVersion
-  val http4sCirce = "org.http4s"  %% "http4s-circe"        % http4sVersion
-
-  val circeVersion = "0.12.1"
-  val circeCore = "io.circe"          %% "circe-core"           % circeVersion
-  val circeGeneric = "io.circe"       %% "circe-generic"        % circeVersion
-  val circeGenericExtras = "io.circe" %% "circe-generic-extras" % circeVersion
-  val circeParser = "io.circe"        %% "circe-parser"         % circeVersion
-  val circeFs2 = "io.circe"           %% "circe-fs2"            % "0.11.0"
-
+  // for ByteVector
   val scodecBits = "org.scodec" %% "scodec-bits" % "1.1.9"
   val scodecCore = "org.scodec" %% "scodec-core" % "1.11.3"
 
-  val web3jVersion = "4.5.0"
-  val web3jCrypto = "org.web3j" % "crypto" % web3jVersion
-  val web3jCore = "org.web3j"   % "core"   % web3jVersion
-
-  val toml = "com.electronwill.night-config" % "toml" % "3.4.2"
-
-  val rocksDb = "org.rocksdb"      % "rocksdbjni" % "5.17.2"
-  val levelDb = "org.iq80.leveldb" % "leveldb"    % "0.12"
-
-  val protobuf = "io.github.scalapb-json"  %% "scalapb-circe"     % "0.4.3"
-  val protobufUtil = "com.google.protobuf" % "protobuf-java-util" % "3.7.1"
-
-  val bouncyCastle = "org.bouncycastle" % "bcprov-jdk15on" % "1.61"
-
-  val asyncHttpClient = "org.asynchttpclient" % "async-http-client" % "2.8.1"
-
-  /* Test deps*/
+  // test deps
   val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.8"     % Test
   val catsTestkit = "org.typelevel"                      %% "cats-testkit"              % catsVersion % Test
   val disciplineScalaTest = "org.typelevel"              %% "discipline-scalatest"      % "1.0.0-M1"  % Test
