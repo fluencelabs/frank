@@ -92,7 +92,7 @@ object SbtCommons {
         val managedResource = s"${(resourceManaged in Compile).value}/native"
 
         val darwinLib = new File(managedResource + "/x86_64-darwin/libfrank.dylib")
-        val linuxLib = new File(managedResource + "/linux_x86_64/libfrank.so")
+        val linuxLib = new File(managedResource + "/x86_64-linux/libfrank.so")
 
         IO.copyFile(
           new File(s"${file("").getAbsolutePath}/src/main/rust/target/x86_64-unknown-linux-gnu/release/libfrank.so"),
