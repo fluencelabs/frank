@@ -23,7 +23,7 @@ use parity_wasm::elements;
 
 use crate::vm::config::Config;
 use crate::vm::errors::InitializationError;
-use parity_wasm::elements::{MemorySection, MemoryType, ResizableLimits};
+use parity_wasm::elements::{MemorySection, MemoryType};
 
 struct ModulePreparator {
     module: elements::Module,
@@ -40,20 +40,19 @@ impl<'a> ModulePreparator {
         let Self { mut module } = self;
 
         // At now, there is could be only one memory section, so
-        // it needs just to extract previous initial page count, delete existing memory section
-        let limits = match module.memory_section_mut() {
+        // it needs just to extract previous initial page count,
+        // delete an old entry and add create a new one with updated limits
+        let mem_initial = match module.memory_section_mut() {
             Some(section) => match section.entries_mut().pop() {
-                Some(entry) => *entry.limits(),
-                None => ResizableLimits::new(0 as _, Some(mem_pages_count)),
+                Some(entry) => entry.limits().initial(),
+                None => 0,
             },
-            None => ResizableLimits::new(0 as _, Some(mem_pages_count)),
+            None => 0,
         };
 
-        let memory_entry = MemoryType::new(limits.initial(), Some(mem_pages_count));
-
+        let memory_entry = MemoryType::new(mem_initial, Some(mem_pages_count));
         let mut default_mem_section = MemorySection::default();
 
-        // and create a new one
         module
             .memory_section_mut()
             .unwrap_or_else(|| &mut default_mem_section)
